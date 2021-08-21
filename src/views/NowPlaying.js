@@ -91,7 +91,7 @@ console.log(populars);
                        <div className="movie-card" key={pops.id}>
                        <div className="movie-header " style={{backgroundImage: "url(" + `http://image.tmdb.org/t/p/original${pops.poster_path}` + ")", 
                        backgroundSize: 'cover',
-                        height: 'auto'
+                       
                        }}>
                            <div className="header-icon-container">
                                <a href={`https://www.2embed.ru/embed/tmdb/movie?id=${pops.id}`} target="_blank">

@@ -7,8 +7,11 @@ import { Line, Bar } from "react-chartjs-2";
 import { Link , useHistory, useLocation} from "react-router-dom";
 import Api from 'vars'
 import logo from "assets/img/CV.png";
-import '../assets/css/card.css';
 
+
+import { useKeenSlider } from "keen-slider/react"
+import "keen-slider/keen-slider.min.css"
+import '../assets/css/card.css';
 // reactstrap components
 import {
   Button,
@@ -35,6 +38,35 @@ import {
 
 function Home(props) {
 
+
+   
+
+    // function getWindowDimensions() {
+    //     const { innerWidth: width, innerHeight: height } = window;
+    //     return {
+    //       width,
+    //       height
+    //     };
+    //   }
+     
+    const [sliderRef] = useKeenSlider({
+        spacing: 10,
+        slidesPerView: 1,
+        centered: true,
+        loop: true,
+        breakpoints: {
+          "(min-width: 768px)": {
+            slidesPerView: 3
+          },
+          "(min-width: 1200px)": {
+            slidesPerView: 5
+          },
+        },
+      })
+
+
+
+
     const history = useHistory();
     const passtoview = (rcode) => {
         let arrval = [{
@@ -49,14 +81,20 @@ function Home(props) {
     }
 
 useEffect( () => {
+    
     getPopulars();
-},[])
+   setTimeout( () =>{
+    movieSearch();
+   },250)
+},[searchresult])
 
+ 
 
-
+// const [windowDimensions, setWindowDimensions] = useState(getWindowDimensions());
+// console.log(windowDimensions.width)
 
 function getPopulars(){
-    fetch(`https://api.themoviedb.org/3/movie/upcoming?api_key=${Api}&language=en-US&page=1`,{
+    fetch(`https://api.themoviedb.org/3/movie/upcoming?api_key=${Api}&language=en-US`,{
         method: 'POST',
       
         })
@@ -68,33 +106,62 @@ function getPopulars(){
         })
 }
 
+function movieSearch(){
+    
+
+    fetch(`https://api.themoviedb.org/3/movie/upcoming?api_key=${Api}&language=en-US`,{
+        method: 'POST',
+      
+        })
+        .then(response => response.json())
+        
+            .then((data) =>{  
+                // console.log(data.results);
+               if(data.total_results === 0){
+                    setSearchresult(false);
+
+               }else{
+                setSearchresult(true);
+                setTimeout(() => {
+                    setSearch(data);
+                }, 250);
+               }
+        })
+}
+
+// const clickSearch = () => {
+//     movieSearch(searchQuery);
+// }
+
+const [searchresult , setSearchresult] = useState(false);
+
+const [searchQuery, setSearchQuery] = useState("");
+const [sirch, setSearch] = useState([]);
 const [populars, setPopulars] = useState([]);
 
-console.log(populars);
+// console.log(populars);
+console.log(sirch);
 
 
-  return (
-    <>
+function nothing(){
+   return(
+        <h1>
+        NOthing to display
+    </h1>
+   )
+}
 
-
-      <div className="content">
-      <Row>
-          <Col xs="12">
-            <Card className="card-chart">
-              <CardHeader>
-                  <Col className="text-left" sm="12">
-                    <CardTitle tag="h2">Upcoming Movies</CardTitle>
-                  </Col>      
-              </CardHeader>
-              <CardBody >
-                    {populars.map((pops, index) => (
-                       <div className="movie-card" key={pops.id}>
-                       <div className="movie-header " style={{backgroundImage: "url(" + `http://image.tmdb.org/t/p/original${pops.poster_path}` + ")", 
+function renderSearch(){
+    return(
+       <>
+         {populars.map((ser, index) => (
+                       <div className="movie-card" key={ser.id}>
+                       <div className="movie-header " style={{backgroundImage: "url(" + `https://image.tmdb.org/t/p/original${ser.poster_path}` + ")", 
                        backgroundSize: 'cover',
-                        height: 'auto'
+                       
                        }}>
                            <div className="header-icon-container">
-                               <a href={`https://www.2embed.ru/embed/tmdb/movie?id=${pops.id}`} target="_blank">
+                               <a href={`https://www.2embed.ru/embed/tmdb/movie?id=${ser.id}`} target="_blank">
                                    <i className="tim-icons icon-triangle-right-17 header-icon"></i>
                                </a>
                            </div>
@@ -102,17 +169,17 @@ console.log(populars);
                        <div className="movie-content">
                            <div className="movie-content-header">
                                <a href="#">
-                                   <span className="movie-title">{pops.original_title}</span>
+                                   <span className="movie-title">{ser.original_title}</span>
                                </a>
                                <div className="imax-logo"></div>
                            </div>
                            <div className="movie-info">
                                <div className="info-section">
-                                   <span className="__label blacker">{pops.release_date}</span>
+                                   <span className="__label blacker">{ser.release_date}</span>
                                    {/* <span>Sun 8 Sept - 10:00PM</span> */}
                                </div>
                                <div className="info-section">
-                                   <span className="__label blacker">{pops.original_language}</span>
+                                   <span className="__label blacker">{ser.original_language}</span>
                                    {/* <span>03</span> */}
                                </div>
                                {/* <div class="info-section">
@@ -127,10 +194,116 @@ console.log(populars);
                        </div>
                    </div>
                         ))}
+       </>
+    )
+}
+
+function renderPopular(){
+        return(
+            
+    <div ref={sliderRef} className="keen-slider">    
+              {populars.map((pops, index) => (
+                             <div className="keen-slider__slide"  key={pops.id} >
+                                    <div className="movie-card-scroll">
+                                        <div className="movie-header " style={{backgroundImage: "url(" + `http://image.tmdb.org/t/p/original${pops.poster_path}` + ")", 
+                                        backgroundSize: 'cover',
+                                            height: 250
+                                        }}>
+                                            <div className="header-icon-container">
+                                                <a href={`https://www.2embed.ru/embed/tmdb/movie?id=${pops.id}`} target="_blank">
+                                                    <i className="tim-icons icon-triangle-right-17 header-icon"></i>
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <div className="movie-content">
+                                            <div className="movie-content-header">
+                                                <a href="#">
+                                                    <span className="movie-title">{pops.original_title}</span>
+                                                </a>
+                                                <div className="imax-logo"></div>
+                                            </div>
+                                            <div className="movie-info">
+                                                <div className="info-section">
+                                                    <span className="__label blacker">{pops.release_date}</span>
+                                                    {/* <span>Sun 8 Sept - 10:00PM</span> */}
+                                                </div>
+                                                <div className="info-section">
+                                                    <span className="__label blacker">{pops.original_language}</span>
+                                                    {/* <span>03</span> */}
+                                                </div>
+                                                {/* <div class="info-section">
+                                                    <span className="__label blacker">Row</span>
+                                                    <span>F</span>
+                                                </div>
+                                                <div class="info-section">
+                                                    <span className="__label blacker">Seat</span>
+                                                    <span>21,22</span>
+                                                </div> */}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+            </div>
+        )
+}
+
+
+  return (
+    <>
+
+
+      <div className="content">
+   
+<Row>
+<Col xs="12">
+<Card className="card-user">
+              <CardBody>
+          {renderPopular()}
+              </CardBody>
+             
+            </Card>
+
+</Col>
+<Col xs="12">
+            <Card className="card-chart">
+              <CardHeader>
+                  <Col className="text-left" sm="12">
+                    <CardTitle tag="h2">Movie Search</CardTitle>
+                  </Col>      
+                  <Row>
+
+                  <Col className="pr-md-1 pt-2" md="6">
+                  <FormGroup>
+                        <Input
+                          defaultValue=""
+                          placeholder="Movie Title Here"
+                          type="text"
+                        //   onBlur={(e) => setSearchQuery(e.target.value)}
+                        />
+                      </FormGroup>
+                    </Col>
+                    <Col className="pl-md-1 " md="6">
+                      <FormGroup>
+                        {/* <Button className="btn-fill" size="lg" color="primary" type="submit" onClick={clickSearch()}>
+                            Search Now
+                            </Button> */}
+                      </FormGroup>
+                    </Col>
+         
+                  </Row>
+                    
+
+              </CardHeader>
+              <CardBody >
+
+                {searchresult ? renderSearch() : nothing()}
+              
+        
               </CardBody>
             </Card>
           </Col>
-        </Row>
+</Row>
       </div>
     </>
   );
